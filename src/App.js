@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Lobby from './Lobby/Lobby'
 import Header from "./Header/Header";
-import Map from "./Map/Map";
 
 function App() {
 	
@@ -19,7 +18,6 @@ function AppContent() {
 			<Routes>
 				<Route path="/header" element={<Header />} />
 				<Route path="/" element={<Lobby />} />
-				<Route path="/Map" element={<Map />} />
 			</Routes>
 		</>
 	);
