@@ -16,7 +16,6 @@ function AppContent() {
 		<>	
 			<Routes>
 				<Route path="/" element={<Lobby />} />
-				<Route path="/123" element={<Lobby />} />
 			</Routes>
 		</>
 	);
