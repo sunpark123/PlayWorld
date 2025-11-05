@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import Lobby from './Lobby/Lobby'
 
 function App() {
 	
@@ -15,7 +15,7 @@ function AppContent() {
 	return (
 		<>	
 			<Routes>
-				<Route path="/" element={<Login />} />
+				<Route path="/" element={<Lobby />} />
 			</Routes>
 		</>
 	);
