@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Lobby from './Lobby/Lobby'
+import Twozerofoureight from './2048/2048'
 import Header from "./Header/Header";
-import Map from "./Map/Map";
 
 function App() {
 	
@@ -18,8 +17,7 @@ function AppContent() {
 		<>	
 			<Routes>
 				<Route path="/header" element={<Header />} />
-				<Route path="/" element={<Lobby />} />
-				<Route path="/Map" element={<Map />} />
+				<Route path="/" element={<Twozerofoureight />} />
 			</Routes>
 		</>
 	);
