@@ -32,16 +32,16 @@ function Lobby() {
 						background: (style.number === 1) ? style.background : 'rgba(255, 255, 255, 0.075);'
 					}}>
 						<img src="puzzle.png" alt="gameIcon"></img>
-						<h1>GAme</h1>
-						<p>GameisGOGOGO</p>
+						<h1>Map</h1>
+						<p>Adventer World</p>
 					</div>
 					<div className="lobbyButton" onMouseMove={(e) => handleMouseMove(2, e)}  onMouseLeave={() => resetStyle(2)} style={{
 						transform: (style.number === 2) ? style.transform : 'none',
 						background: (style.number === 2) ? style.background : 'rgba(255, 255, 255, 0.075);'
 					}}>
 						<img src="puzzle.png" alt="gameIcon"></img>
-						<h1>GAme</h1>
-						<p>GameisGOGOGO</p>
+						<h1>Tetirs</h1>
+						<p>Block Game</p>
 					</div>
 				</div>
 				<div className="lobbyBox">
@@ -50,16 +50,16 @@ function Lobby() {
 						background: (style.number === 3) ? style.background : 'rgba(255, 255, 255, 0.075);'
 					}}>
 						<img src="puzzle.png" alt="gameIcon"></img>
-						<h1>GAme</h1>
-						<p>GameisGOGOGO</p>
+						<h1>Pinball</h1>
+						<p>Ball is pin</p>
 					</div>
 					<div className="lobbyButton" onMouseMove={(e) => handleMouseMove(4, e)}  onMouseLeave={() => resetStyle(4)} style={{
 						transform: (style.number === 4) ? style.transform : 'none',
 						background: (style.number === 4) ? style.background : 'rgba(255, 255, 255, 0.075);'
 					}}>
 						<img src="puzzle.png" alt="gameIcon"></img>
-						<h1>GAme</h1>
-						<p>GameisGOGOGO</p>
+						<h1>2048</h1>
+						<p>Test your brain</p>
 					</div>
 				</div>
 			</div>
