@@ -1,0 +1,48 @@
+.two{
+    width: 410px;
+    height: 410px;
+    background-color: gray;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    position: absolute;
+    border-radius: 5px;
+    .zero{
+        width: 400px;
+        height: 400px;
+        background-color: rgb(173, 173, 173);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        position: absolute;
+        border-radius: 5px;
+    }
+    span.sero{
+        position: absolute;
+        height: 99%;
+        margin-top: 0.5%;
+        outline: 3px solid gray;
+        left: calc(var(--i) * 100px);
+        border-radius: 5px;
+    }
+    span.garo{
+        position: absolute;
+        width: 99%;
+        margin-left: 0.5%;
+        outline: 3px solid gray;
+        top: calc(var(--i) * 100px);
+        border-radius: 5px;
+    }
+
+    .block{
+        width: 100px;
+        height: 100px;
+        background-color: rgb(248, 248, 248);
+        border-radius: 5px;
+        float: left;
+        h1{
+            text-align: center;
+            line-height: 100px;
+        }
+    }
+}
