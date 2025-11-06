@@ -1,145 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./PinBall.css";
-import Header from "../Header/Header";
 
 function PinBall() {
-  const canvasRef = useRef(null);
   const [power, setPower] = useState(0);
   const [charging, setCharging] = useState(false);
-    const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState(0);
 
+  const bumpersRef = useRef([]);
+  const [bumpers, setBumpers] = useState([]);
+  const leftFlipperRef = useRef(null);
+  const rightFlipperRef = useRef(null);
+  const leftGuardRef = useRef(null);
+  const rightGuardRef = useRef(null);
+
+  const [ballPos, setBallPos] = useState({ x: 180, y: 10 });
+  const [ballVel, setBallVel] = useState({ x: 0, y: 0 });
+
+  // ✅ 스페이스바 입력 처리
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    canvas.width = 400;
-    canvas.height = 600;
-
-    let ball = { x: 200, y: 550, radius: 8, dx: 0, dy: 0 };
-    const gravity = 0.3;
-
-    // ✅ 범퍼 세 개
-    const bumpers = [
-      { x: 100, y: 200, r: 25 },
-      { x: 200, y: 300, r: 25 },
-      { x: 300, y: 200, r: 25 },
-    ];
-
-    // ✅ 플리퍼 두 개 (좌우)
-    let leftFlipper = { x: 150, y: 540, width: 60, height: 10, angle: 0, velocity: 0 };
-    let rightFlipper = { x: 250, y: 540, width: 60, height: 10, angle: 0, velocity: 0 };
-
-    // 🎨 공 그리기
-    function drawBall() {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "#0ff";
-      ctx.fill();
-      ctx.closePath();
-    }
-
-    // 🎨 범퍼 그리기
-    function drawBumpers() {
-      bumpers.forEach((b) => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#6600ff";
-        ctx.fill();
-        ctx.strokeStyle = "#99f";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.closePath();
-      });
-    }
-
-    // 🎨 플리퍼 그리기
-    function drawFlipper(f, isLeft = true) {
-      ctx.save();
-      ctx.translate(f.x, f.y);
-      ctx.rotate((isLeft ? -1 : 1) * f.angle);
-      ctx.fillStyle = "#0f0";
-      ctx.fillRect(-f.width / 2, -f.height / 2, f.width, f.height);
-      ctx.restore();
-    }
-
-    // 🎨 파워 게이지
-    function drawPowerBar() {
-      ctx.fillStyle = "#444";
-      ctx.fillRect(50, 570, 300, 10);
-      ctx.fillStyle = "#0f0";
-      ctx.fillRect(50, 570, 3 * power, 10);
-    }
-
-    // ⚙ 공과 범퍼 충돌
-    function checkBumperCollision() {
-      bumpers.forEach((b) => {
-        const dx = ball.x - b.x;
-        const dy = ball.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < ball.radius + b.r) {
-          const nx = dx / dist;
-          const ny = dy / dist;
-          const dot = ball.dx * nx + ball.dy * ny;
-
-          ball.dx -= 2 * dot * nx;
-          ball.dy -= 2 * dot * ny;
-
-          const overlap = ball.radius + b.r - dist;
-          ball.x += (nx * overlap) / 2;
-          ball.y += (ny * overlap) / 2;
-        }
-      });
-    }
-
-    // ⚙ 플리퍼 물리
-    function updateFlipper(f) {
-      f.angle += f.velocity;
-      f.velocity *= 0.85; // 감속
-
-      // 회전 한계
-      if (f.angle > Math.PI / 4) f.angle = Math.PI / 4;
-      if (f.angle < 0) f.angle = 0;
-    }
-
-    // ⚙ 메인 루프
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBumpers();
-      drawBall();
-      drawFlipper(leftFlipper, true);
-      drawFlipper(rightFlipper, false);
-      drawPowerBar();
-
-      updateFlipper(leftFlipper);
-      updateFlipper(rightFlipper);
-
-      // 중력
-      if (ball.dy !== 0 || ball.y < 550) {
-        ball.dy += gravity;
-        ball.y += ball.dy;
-        ball.x += ball.dx;
-
-        // 하단 충돌
-        if (ball.y + ball.radius > 550) {
-          ball.y = 550 - ball.radius;
-          ball.dy *= -0.5;
-        }
-
-        // 좌우 벽 충돌
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
-          ball.dx *= -1;
-        }
-
-        // 범퍼 충돌
-        checkBumperCollision();
-      }
-
-      requestAnimationFrame(update);
-    }
-
-    update();
-
-    // 🔘 키 입력
     const handleKeyDown = (e) => {
       if (e.code === "Space") {
         e.preventDefault();
@@ -151,50 +29,193 @@ function PinBall() {
       if (e.code === "Space") {
         e.preventDefault();
         setCharging(false);
-        // 스페이스바를 떼면 현재 power 만큼 회전
-        const hitAngle = Math.min(power / 2, 45); // 최대 45도 제한
+
+        const hitAngle = Math.min(power / 1.1, 45);
         setAngle(hitAngle);
 
-        // 플리퍼가 돌아갔다가 다시 제자리로
-        setTimeout(() => {
-          setAngle(0);
-        }, 200);
+        // 공 발사 (power에 따라 위로)
+        setBallVel({ x: 0, y: -power / 3 });
 
-        // power 초기화
+        setTimeout(() => setAngle(0), 200);
         setPower(0);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [power, charging]);
+  }, [power]);
 
-  // ⚙ 파워 충전 루프
+  // ✅ 파워 충전
   useEffect(() => {
     let interval;
     if (charging) {
       interval = setInterval(() => {
-        setPower((prev) => Math.min(prev + 2, 100));
+        setPower((prev) => Math.min(prev + 5, 100));
       }, 30);
-    } else {
-      clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [charging]);
 
+  // ✅ 범퍼 좌표 초기화 (DOM 로드 후 한 번 계산)
+  useEffect(() => {
+    const updateBumperPositions = () => {
+      const newBumpers = bumpersRef.current.map((b) => {
+        if (!b) return null;
+        const rect = b.getBoundingClientRect();
+        const containerRect = b.parentNode.getBoundingClientRect();
+        return {
+          x: rect.left - containerRect.left + rect.width / 2,
+          y: rect.top - containerRect.top + rect.height / 2,
+          r: rect.width / 2,
+        };
+      });
+      setBumpers(newBumpers);
+    };
+
+    updateBumperPositions();
+    window.addEventListener("resize", updateBumperPositions);
+    return () => window.removeEventListener("resize", updateBumperPositions);
+  }, []);
+
+  // ✅ 물리 업데이트 (공 + 충돌)
+  useEffect(() => {
+    const gravity = 0.6;
+    const radius = 49;
+
+    const update = () => {
+      setBallPos((prev) => {
+        let newX = prev.x;
+        let newY = prev.y;
+        let newVelX = ballVel.x;
+        let newVelY = ballVel.y + gravity;
+
+        const steps = 4;
+        for (let i = 0; i < steps; i++) {
+          newX += newVelX / steps;
+          newY += newVelY / steps;
+
+          // 벽 충돌
+          if (newX < 0) {
+            newX = 0;
+            newVelX *= -0.9;
+          } else if (newX > 370) {
+            newX = 370;
+            newVelX *= -0.9;
+          }
+          if (newY > 1000) {
+            newY = 1000;
+            newVelY *= -0.6;
+          }
+
+          // ✅ 범퍼 충돌 (원형)
+          bumpers.forEach((b) => {
+            if (!b) return;
+            const dx = newX + radius / 2 - b.x;
+            const dy = newY + radius / 2 - b.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const sumRadius = b.r + radius / 2;
+
+            if (dist < sumRadius) {
+              const normalX = dx / dist;
+              const normalY = dy / dist;
+              const dot = newVelX * normalX + newVelY * normalY;
+              newVelX -= 2 * dot * normalX;
+              newVelY -= 2 * dot * normalY;
+              newVelX *= 0.85;
+              newVelY *= 0.85;
+
+              const overlap = sumRadius - dist + 0.5;
+              newX += normalX * overlap;
+              newY += normalY * overlap;
+            }
+          });
+
+          // ✅ 플리퍼 충돌
+          [leftFlipperRef.current, rightFlipperRef.current].forEach((flipper) => {
+            if (!flipper) return;
+            const rect = flipper.getBoundingClientRect();
+            const containerRect = flipper.parentNode.getBoundingClientRect();
+            const fx = rect.left - containerRect.left + rect.width / 2;
+            const fy = rect.top - containerRect.top + rect.height / 2;
+
+            const dx = newX + radius / 2 - fx;
+            const dy = newY + radius / 2 - fy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const sumRadius = rect.width / 2 + radius / 2;
+
+            if (dist < sumRadius) {
+              const normalX = dx / dist;
+              const normalY = dy / dist;
+              const dot = newVelX * normalX + newVelY * normalY;
+              newVelX -= 2 * dot * normalX;
+              newVelY -= 2 * dot * normalY;
+              newVelX *= 1.1;
+              newVelY *= 1.2;
+
+              const overlap = sumRadius - dist + 0.5;
+              newX += normalX * overlap;
+              newY += normalY * overlap;
+            }
+          });
+        }
+
+        setBallVel({ x: newVelX, y: newVelY });
+        return { x: newX, y: newY };
+      });
+    };
+
+    const interval = setInterval(update, 16);
+    return () => clearInterval(interval);
+  }, [ballVel, bumpers]);
+
   return (
-    <>
-      <Header />
-      <div className="pinball-container">
-        <canvas ref={canvasRef}></canvas>
-        <p className="power-text">Power: {power}</p>
+    <div className="pinball-container">
+      <img src="/background.png" alt="background" className="background" />
+
+      {[1, 2, 3].map((n, i) => (
+        <div
+          key={n}
+          className={`bumper bumper${n}`}
+          ref={(el) => (bumpersRef.current[i] = el)}
+        />
+      ))}
+
+      <div className="guard left-guard" ref={leftGuardRef}></div>
+      <div className="guard right-guard" ref={rightGuardRef}></div>
+
+      <img
+        src="/flipper_left.png"
+        alt="left flipper"
+        className="flipper left"
+        ref={leftFlipperRef}
+        style={{ transform: `rotate(${-angle}deg)` }}
+      />
+      <img
+        src="/flipper_right.png"
+        alt="right flipper"
+        className="flipper right"
+        ref={rightFlipperRef}
+        style={{ transform: `rotate(${angle}deg)` }}
+      />
+
+      <img
+        src="/ball.png"
+        alt="ball"
+        className="ball"
+        style={{
+          top: `${ballPos.y}px`,
+          left: `${ballPos.x}px`,
+        }}
+      />
+
+      <div className="power-bar">
+        <div className="power-fill" style={{ width: `${power}%` }} />
       </div>
-    </>
+    </div>
   );
 }
 
