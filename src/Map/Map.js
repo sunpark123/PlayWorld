@@ -7,6 +7,7 @@ function Map() {
   const [rvObj, setRvObj] = useState(null);   // 로드뷰 객체
   const [geocoder, setGeocoder] = useState(null); // 주소 검색 객체
   const [searchAddr, setSearchAddr] = useState(""); // 검색어
+  
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -57,39 +58,101 @@ function Map() {
   }, []);
 
   // 주소 검색 핸들러
-  const handleSearch = () => {
-    if (!geocoder || !mapObj || !rvObj || searchAddr.trim() === "") return;
+  const [autoCompleteList, setAutoCompleteList] = useState([]); // 자동완성 리스트
 
-    geocoder.addressSearch(searchAddr, (result, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const { y, x } = result[0]; // 위도(y), 경도(x)
+  const handleSearch = (addr = searchAddr) => {
+    if (!geocoder || !mapObj || !rvObj || !addr.trim()) return;
+
+    geocoder.addressSearch(addr, (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK && result[0]) {
+        const { y, x } = result[0];
         const newPos = new window.kakao.maps.LatLng(y, x);
 
-        mapObj.setCenter(newPos); // 지도 이동
+        // 지도 이동
+        mapObj.setCenter(newPos);
+
+        // 로드뷰 이동
         const rvClient = new window.kakao.maps.RoadviewClient();
         rvClient.getNearestPanoId(newPos, 50, (panoId) => {
-          rvObj.setPanoId(panoId, newPos); // 로드뷰 이동
+          if (panoId) {
+            rvObj.setPanoId(panoId, newPos);
+          } else {
+            alert("근처에 로드뷰가 없습니다.");
+          }
         });
+
+        // 자동완성 리스트 초기화
+        setAutoCompleteList([]);
       } else {
         alert("주소를 찾을 수 없습니다.");
-      }
-    });
-  };
+    }
+  });
+};
+
+// 입력값 변경 시 자동완성 호출
+const handleInputChange = (e) => {
+  const value = e.target.value;
+  setSearchAddr(value);
+
+  if (!value.trim()) {
+    setAutoCompleteList([]);
+    return;
+  }
+
+  const ps = new window.kakao.maps.services.Places();
+  ps.keywordSearch(value, (data, status) => {
+    if (status === window.kakao.maps.services.Status.OK) {
+      // 주소 이름만 리스트로 저장
+      setAutoCompleteList(data.map(item => item.address_name));
+    }
+  });
+};
+
+// 자동완성 아이템 클릭 시
+const handleAutoCompleteClick = (addr) => {
+  setSearchAddr(addr);
+  setAutoCompleteList([]);
+  handleSearch(addr); // 선택 즉시 검색
+};
+
+const [isMapVisible, setIsMapVisible] = useState(true);
+
+const toggleMap = () => {
+  setIsMapVisible((prev) => !prev);
+};
 
   return (
     <>
       <Header />
       <div className="map-wrapper">
-        <div className="map-area">
-          <input
-            type="text"
-            placeholder="주소 입력"
-            value={searchAddr}
-            onChange={(e) => setSearchAddr(e.target.value)}
-          />
-          <button onClick={handleSearch}>검색</button>
-          <div id="map" className="map-view"></div>
+      <div className={`map-area ${isMapVisible ? 'visible' : 'hidden'}`}>
+        <input
+          type="text"
+          placeholder="주소 입력"
+          value={searchAddr}
+          onChange={handleInputChange}
+        />
+        <button onClick={() => handleSearch()}>검색</button>
+
+        <div className="autocomplete-list">
+          {autoCompleteList.map((addr, idx) => (
+            <div
+              key={idx}
+              className="autocomplete-item"
+              onClick={() => handleAutoCompleteClick(addr)}
+            >
+              {addr}
+            </div>
+          ))}
         </div>
+
+        <div id="map" className="map-view"></div>
+        </div>
+
+        <div className="toggle-btn" onClick={toggleMap}>
+          <span className={`arrow ${isMapVisible ? '' : 'rotated'}`}>➤</span>
+        </div>
+
         <div className="roadview-area">
           <div id="roadview" className="roadview-view"></div>
         </div>

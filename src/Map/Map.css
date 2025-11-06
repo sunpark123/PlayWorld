@@ -1,24 +1,28 @@
-html, body, #root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .map-wrapper {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 102px);
+  position: relative;
 
   .map-area {
+    border: solid 1px blueviolet;
     width: 20%;
     height: 100%;
     position: relative;
+    transition: transform 0.5s ease, width 0.5s ease;
+
+    &.hidden {
+      transform: translateX(-100%);
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
 
     #map {
       width: 100%;
       height: 100%;
+      border-radius: 6px;
     }
 
     input {
@@ -26,35 +30,57 @@ html, body, #root {
       top: 10px;
       left: 10px;
       width: calc(100% - 70px);
+      height: 20px;
       z-index: 10;
       padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      outline: none;
+
+      &:focus {
+        border-color: #e20148;
+        box-shadow: 0 0 5px rgba(226, 1, 72, 0.3);
+      }
     }
 
     button {
       position: absolute;
+      height: 32px;
       top: 10px;
       right: 10px;
       z-index: 10;
       padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #e20148;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        background-color: #c5003d;
+      }
     }
 
     .autocomplete-list {
       position: absolute;
-      top: 40px;
+      top: 50px;
       left: 10px;
       width: calc(100% - 20px);
       max-height: 200px;
       overflow-y: auto;
       background: white;
       border: 1px solid #ddd;
+      border-radius: 4px;
       z-index: 20;
       padding: 0;
       margin: 0;
       list-style: none;
 
       li {
-        padding: 5px 10px;
+        padding: 8px 10px;
         cursor: pointer;
+        font-size: 14px;
 
         &:hover {
           background-color: #f0f0f0;
@@ -64,14 +90,18 @@ html, body, #root {
   }
 
   .roadview-area {
-    width: 80%;
+    border: solid 1px blueviolet;
+    flex: 1; 
     height: 100%;
     position: relative;
+    transition: width 0.5s ease;
 
-    .map-view,.roadview-view {
-        width: 100%;
-        height: 100%;
-        min-height: 400px;
+    .map-view,
+    .roadview-view {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      border-radius: 6px;
     }
 
     .center-icon,
@@ -85,6 +115,43 @@ html, body, #root {
       pointer-events: none;
       z-index: 10;
       opacity: 0.95;
+    }
+  }
+
+
+  .toggle-btn {
+    position: absolute;
+    top: 0%;
+    left: 20%; 
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 1);
+    color: white;
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    transition: left 0.5s ease;
+
+    .map-wrapper .map-area.hidden & {
+      left: 0; 
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    .arrow {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .arrow.rotated {
+      transform: rotate(180deg);
     }
   }
 }
