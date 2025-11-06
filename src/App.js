@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Lobby from './Lobby/Lobby'
 import Header from "./Header/Header";
-import Map from "./Map/Map";
+import PinBall from "./PinBall/PinBall";
 
 function App() {
 	
@@ -18,8 +17,8 @@ function AppContent() {
 		<>	
 			<Routes>
 				<Route path="/header" element={<Header />} />
-				<Route path="/" element={<Lobby />} />
-				<Route path="/Map" element={<Map />} />
+				<Route path="/PinBall" element={<PinBall />} />
+
 			</Routes>
 		</>
 	);
