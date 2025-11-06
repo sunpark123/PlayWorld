@@ -24,6 +24,7 @@
         outline: 3px solid gray;
         left: calc(var(--i) * 100px);
         border-radius: 5px;
+        z-index: 100;
     }
     span.garo{
         position: absolute;
@@ -32,9 +33,11 @@
         outline: 3px solid gray;
         top: calc(var(--i) * 100px);
         border-radius: 5px;
+        z-index: 100;
     }
 
     .block{
+        transition: all 0.3s;
         width: 100px;
         height: 100px;
         background-color: rgb(248, 248, 248);
@@ -44,5 +47,49 @@
             text-align: center;
             line-height: 100px;
         }
+    }
+    #B_0 {background-color: transparent;}
+    #B_2    { background-color: #f7f1e6; }
+    #B_4    { background-color: #f5e3b7; }
+    #B_8    { background-color: #f3b27a; }
+    #B_16   { background-color: #f3895b; }
+    #B_32   { background-color: #f06b3a; }
+    #B_64   { background-color: #e44b2a; }
+
+    #B_128  { background-color: #f2d179; color: #776e65; }
+    #B_256  { background-color: #f0c96a; }
+    #B_512  { background-color: #f0c14a; }
+
+    #B_1024 { background-color: #e6b800; }
+    #B_2048 { background-color: #e1a100; }
+
+    
+}
+
+.end{
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.623);
+    h1{
+        text-align: center;
+        color:white;
+        font-weight: bold;
+        font-size: 60px;
+        line-height: 500px;
+    }
+    button{
+        left: 50%;
+        position: absolute;
+        transform: translateX(-50%);
+        border-radius: 15px;
+        width: 300px;
+        height: 150px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60px;
+    }
+    button:hover{
+        background-color: #929292;
     }
 }

@@ -1,105 +1,183 @@
 import { useState, useEffect } from "react";
 import Header from "../Header/Header";
-import "./2048.css"
+import "./2048.css";
+import { motion } from "framer-motion";
+import { tr } from "framer-motion/client";
 
 function Twozerofoureight() {
-
-    const [size, ] = useState(4);
-
-    const [game, setGame] = useState([
-        [2, 0, 2, 2],
-        [2, 0, 0, 0],
-        [2, 2, 2,2],
-        [0, 0, 2, 0],
-    ]);
-
-    const [canMove, setCanMove] = useState(true);
-
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            switch (event.key) {
-            case "ArrowUp":
-                moveLeft();
-                break;
-            case "ArrowDown":
-                console.log("⬇️ 아래로 이동");
-                break;
-            case "ArrowLeft":
-                console.log("⬅️ 왼쪽으로 이동");
-                break;
-            case "ArrowRight":
-                moveRight();
-                break;
-            default:
-                break;
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
-    const moveRight = () => {
-    const newGame = game.map((line) => {
-        let newLine = [...line].reverse(); // 1️⃣ 오른쪽 → 뒤집어서 왼쪽처럼 처리
-        newLine = newLine.filter((n) => n !== 0); // 2️⃣ 0 제거
-
-        for (let i = 0; i < newLine.length - 1; i++) {
-        if (newLine[i] === newLine[i + 1]) {
-            newLine[i] *= 2;
-            newLine[i + 1] = 0;
-        }
-        }
-
-        newLine = newLine.filter((n) => n !== 0);
-        while (newLine.length < size) newLine.push(0); // 3️⃣ 오른쪽이 아니라 왼쪽에 0 채우기
-
-        return newLine.reverse(); // 4️⃣ 다시 뒤집어서 원래 방향으로
-    });
-
-    setGame(newGame);
-    };
-    const moveLeft = () => {
-        const newGame = game.map((line) => [...line]);
-
-        for (let b = 0; b < 3; b++) {
-            newGame.forEach((line) => {
-                for (let i = 0; i < 3; i++) {
-                    if(line[i] === line[i+1] || line[i] === 0)
-                    {
-                        line[i] = line[i] + line[i+1];
-                        line[i+1] = 0;
-                    }
-                }
+    const [size] = useState(4);
+    const [end, setEnd] = useState(false);
+    const [tiles, setTiles] = useState(() => {
+        const initial = [];
+        for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            initial.push({
+                id: `${r}-${c}-${Math.random().toString(36).substr(2, 5)}`,
+                value: 0,
+                x: c,
+                y: r,
             });
         }
-        setGame(newGame);
+        }
+        return initial;
+    });
+
+  const getBoard = (tiles) => {
+    const board = Array.from({ length: size }, () =>
+      Array(size).fill({ value: 0 })
+    );
+    tiles.forEach((t) => {
+      board[t.y][t.x] = t;
+    });
+    return board;
+  };
+
+  const addRandomTile = (tiles) => {
+    const empty = tiles.filter((t) => t.value === 0);
+    if (empty.length === 0) {setEnd(true); return tiles;}
+    const chosen = empty[Math.floor(Math.random() * empty.length)];
+    const newValue = Math.random() < 0.5 ? 2 : 4;
+    return tiles.map((t) =>
+      t.id === chosen.id ? { ...t, value: newValue } : t
+    );
+  };
+
+  const compressLineLeft = (line) => {
+    let result = line.filter((t) => t.value !== 0);
+    for (let i = 0; i < result.length - 1; i++) {
+      if (result[i].value === result[i + 1].value) {
+        result[i] = { ...result[i], value: result[i].value * 2 };
+        result[i + 1] = { ...result[i + 1], value: 0 };
+      }
+    }
+    result = result.filter((t) => t.value !== 0);
+    while (result.length < 4)
+      result.push({ id: Math.random().toString(36).slice(2, 7), value: 0 });
+    return result;
+  };
+
+  // ✅ 4방향 이동
+  const moveLeft = () => {
+    setTiles((prev) => {
+      const board = getBoard(prev);
+      const moved = board.map((row, y) => {
+        const compressed = compressLineLeft(row);
+        return compressed.map((t, x) => ({ ...t, x, y }));
+      });
+      return addRandomTile(moved.flat());
+    });
+  };
+
+  const moveRight = () => {
+    setTiles((prev) => {
+      const board = getBoard(prev);
+      const moved = board.map((row, y) => {
+        const reversed = [...row].reverse();
+        const compressed = compressLineLeft(reversed).reverse();
+        return compressed.map((t, x) => ({ ...t, x, y }));
+      });
+      return addRandomTile(moved.flat());
+    });
+  };
+
+  const moveUp = () => {
+    setTiles((prev) => {
+      const board = getBoard(prev);
+      const moved = [];
+      for (let x = 0; x < size; x++) {
+        const col = board.map((row) => row[x]);
+        const compressed = compressLineLeft(col);
+        compressed.forEach((t, y) => moved.push({ ...t, x, y }));
+      }
+      return addRandomTile(moved);
+    });
+  };
+
+  const moveDown = () => {
+    setTiles((prev) => {
+      const board = getBoard(prev);
+      const moved = [];
+      for (let x = 0; x < size; x++) {
+        const col = [...board.map((row) => row[x])].reverse();
+        const compressed = compressLineLeft(col).reverse();
+        compressed.forEach((t, y) => moved.push({ ...t, x, y }));
+      }
+      return addRandomTile(moved);
+    });
+  };
+
+  // ✅ 키 이벤트
+  useEffect(() => {
+    const handle = (e) => {
+      if (e.key === "ArrowLeft") moveLeft();
+      if (e.key === "ArrowRight") moveRight();
+      if (e.key === "ArrowUp") moveUp();
+      if (e.key === "ArrowDown") moveDown();
     };
+    window.addEventListener("keydown", handle);
+    return () => window.removeEventListener("keydown", handle);
+  }, []);
 
-	return (
-		<>
-            <Header></Header>
-            <div className="two">
-                <div className="zero">
-                    {Array.from({ length: size - 1 }, (_, i) => (
-                        <>
-                            <span className="garo" key={`lineGaro_${i}`} style={{ '--i': i + 1 }}></span>
-                            <span className="sero" key={`lineSero_${i}`} style={{ '--i': i + 1 }}></span>
-                        </>
-                    ))}
-                    {game.map((row, rowIndex) =>
-                        row.map((number, colIndex) => (
-                            <div className="block" id={number} key={`block_${rowIndex}-${colIndex}`}>
-                                <h1>{number !== 0 ? number : ""}</h1>
-                            </div>
-                        ))
-                    )}
-                    
-
-                </div>
+  // ✅ 초기 타일 생성
+  useEffect(() => {
+    setTiles((prev) => addRandomTile(addRandomTile(prev)));
+  }, []);
+  const retry = () => {
+    setEnd(false);
+    setTiles(() => {
+        const initial = [];
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                initial.push({
+                    id: `${r}-${c}-${Math.random().toString(36).substr(2, 5)}`,
+                    value: 0,
+                    x: c,
+                    y: r,
+                });
+            }
+        }
+        return initial;
+    })
+    setTiles((prev) => addRandomTile(addRandomTile(prev)));
+  }
+  return (  
+    <>
+      <Header />
+        <div className="two">
+            <div className="zero" style={{ position: "relative" }}>
+                {Array.from({ length: size - 1 }, (_, i) => (
+                    <>
+                    <span className="garo" key={`lineGaro_${i}`} style={{ "--i": i + 1 }}></span>
+                    <span className="sero" key={`lineSero_${i}`} style={{ "--i": i + 1 }}></span>
+                    </>
+                ))}
+                {tiles.map((tile) => (
+                    <motion.div
+                        key={tile.id}
+                        className="block"
+                        id={`B_${tile.value}`}
+                        style={{
+                            position: "absolute",
+                            transform: `translate(${tile.x * 100}px, ${tile.y * 100}px)`,
+                        }}
+                        animate={{
+                            transform: `translate(${tile.x * 100}px, ${tile.y * 100}px)`,
+                        }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                    >
+                        <h1>{tile.value !== 0 ? tile.value : ""}</h1>
+                    </motion.div>
+                ))}
             </div>
-        </>
-	);
+        </div>
+        {end === true && (
+            <div className="end">
+                <h1>Game Over</h1>
+                <button onClick={() => retry()}>다시하기</button>
+            </div>
+        )}
+    </>
+  );
 }
 
 export default Twozerofoureight;
