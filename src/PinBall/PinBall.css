@@ -1,3 +1,11 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 스크롤 숨기기 */
+  height: 100%;
+  width: 100%;
+}
+
 .pinball-wrapper {
   position: relative;
   width: 400px;
@@ -88,7 +96,7 @@
           transform: rotate(-30deg);
           transform-origin: bottom left;
       }
-      
+
       &.right-guard {
         right: 45px;
         transform: rotate(30deg);
