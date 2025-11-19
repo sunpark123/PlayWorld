@@ -1,137 +1,153 @@
-.pinball-container {
+.pinball-wrapper {
   position: relative;
   width: 400px;
-  height: 800px;
-  margin: 50px auto;
-  background-color: #000;
-  overflow: hidden;
-  border-radius: 20px;
-  border: 3px solid #555;
+  margin: 0 auto;
 
-  img {
-    background-color: transparent;
-    pointer-events: none;
-  }
-
-  .background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-  }
-
-  .flipper {
-    position: absolute;
-    bottom: 70px;
-    width: 120px;
-    transform-origin: center center;
-    transition: transform 0.1s ease-out;
-    z-index: 4;
-
-    &.left {
-      left: 43px;
-      transform-origin: left top;
-    }
-
-    &.right {
-      right: 42px;
-      transform-origin: right top;
-    }
-  }
-
-  .ball {
-    position: absolute;
-    top: 30px;
-    left: 150px;
-    width: 98px;
-    height: 98px;
-    z-index: 3;
-  }
-
-  .power-bar {
-    position: absolute;
-    bottom: 10px;
-    left: 20px;
-    width: 360px;
-    height: 10px;
-    background: #333;
-    border-radius: 5px;
+  .pinball-container {
+    position: relative;
+    width: 400px;
+    height: 800px;
+    margin: 50px auto;
+    background-color: #000;
     overflow: hidden;
-    z-index: 3;
+    border-radius: 20px;
+    border: 3px solid #555;
 
-    .power-fill {
+    img {
+      background-color: transparent;
+      pointer-events: none;
+    }
+
+    .background {
+      position: absolute;
+      width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, cyan, deepskyblue);
-      transition: width 0.05s linear;
-    }
-  }
-
-  .guard {
-    position: absolute;
-    bottom: 70px;
-    width: 20px;
-    height: 250px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid #000;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(44, 44, 44, 0.4);
-    z-index: 2; 
-
-    &.left-guard {
-      left: 45px;
-      transform: rotate(-30deg);
-      transform-origin: bottom left;
+      object-fit: cover;
+      z-index: 0;
     }
 
-    &.right-guard {
-      right: 45px;
-      transform: rotate(30deg);
-      transform-origin: bottom right;
-    }
-  }
+    .flipper {
+      position: absolute;
+      bottom: 70px;
+      width: 120px;
+      transform-origin: center center;
+      transition: transform 0.1s ease-out;
+      z-index: 4;
 
-  .bumper {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: #fff;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 0 15px rgba(21, 255, 243, 0.7);
-    z-index: 1;
+      &.left {
+        left: 43px;
+        transform-origin: left top;
+      }
 
-    &.bumper1 {
-      top: 100px;
-      left: 80px;
+      &.right {
+        right: 42px;
+        transform-origin: right top;
+      }
     }
-    &.bumper2 {
-      top: 250px;
-      left: 170px;
+
+    .ball {
+      position: absolute;
+      top: 30px;
+      left: 150px;
+      width: 98px;
+      height: 98px;
+      z-index: 3;
     }
-    &.bumper3 {
-      top: 100px;
-      right: 80px;
+
+    .power-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 20px;
+      width: 360px;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 3;
+
+      .power-fill {
+        height: 100%;
+        background: linear-gradient(90deg, cyan, deepskyblue);
+        transition: width 0.05s linear;
+      }
     }
-  }
+
+    .guard {
+      position: absolute;
+      bottom: 70px;
+      width: 20px;
+      height: 250px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid #000;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(44, 44, 44, 0.4);
+      z-index: 2; 
+
+      &.left-guard {
+    left: 45px;
+    transform: rotate(-30deg);
+    transform-origin: bottom left;
 }
 
-.pinball-score-panel {
-  position: absolute;
-  top: 200px;
-  left: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 
-  font-size: 24px;
-  font-weight: bold;
-  color: #fff;
+      &.right-guard {
+        right: 45px;
+        transform: rotate(30deg);
+        transform-origin: bottom right;
+      }
+    }
 
-  padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 10px;
+    .bumper {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 15px rgba(21, 255, 243, 0.7);
+      z-index: 1;
 
-  z-index: 9999;
-  pointer-events: none; /* 클릭 방해 X */
+      &.bumper1 {
+        top: 100px;
+        left: 80px;
+      }
+      &.bumper2 {
+        top: 250px;
+        left: 170px;
+      }
+      &.bumper3 {
+        top: 100px;
+        right: 80px;
+      }
+    }
+  }
+
+  .pinball-score-panel {
+    position: absolute;
+    top: 200px;
+    left: -200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+
+    z-index: 9990;
+    pointer-events: auto; /* 클릭 방해 X */
+
+    
+    button{
+        margin-top: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        position: relative;
+        z-index: 9999;
+    }
+  }
 }
