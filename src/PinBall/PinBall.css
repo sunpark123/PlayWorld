@@ -84,12 +84,11 @@
       z-index: 2; 
 
       &.left-guard {
-    left: 45px;
-    transform: rotate(-30deg);
-    transform-origin: bottom left;
-}
-
-
+          left: 45px;
+          transform: rotate(-30deg);
+          transform-origin: bottom left;
+      }
+      
       &.right-guard {
         right: 45px;
         transform: rotate(30deg);
