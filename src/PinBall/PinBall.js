@@ -10,14 +10,11 @@ function PinBall() {
   const bumpersRef = useRef([]);
   const [bumpers, setBumpers] = useState([]);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(
-    Number(localStorage.getItem("bestScore")) || 0
-  );
+  const [bestScore, setBestScore] = useState(Number(localStorage.getItem("bestScore")) || 0);
   const bumperHitRef = useRef([]);
 
   const leftFlipperRef = useRef(null);
   const rightFlipperRef = useRef(null);
-
   const leftGuardRef = useRef(null);
   const rightGuardRef = useRef(null);
 
@@ -49,12 +46,12 @@ function PinBall() {
     };
   }
 
+  /* ------------------ 왼쪽 가드 rect 로그 ------------------ */
   useEffect(() => {
-  if (!leftGuardRef.current) return;
-  const rect = getRectPosition(leftGuardRef.current);
-  console.log("왼쪽 가드 rect:", rect);
-}, [scale]);
-
+    if (!leftGuardRef.current) return;
+    const rect = getRectPosition(leftGuardRef.current);
+    console.log("왼쪽 가드 rect:", rect);
+  }, [scale]);
 
   /* ------------------ 입력 처리 (스페이스바) ------------------ */
   useEffect(() => {
@@ -70,7 +67,6 @@ function PinBall() {
         e.preventDefault();
         setCharging(false);
 
-        // 스페이스바 떼면 회전 + 힘 적용
         const hitAngle = Math.min(power / 1.1, 45);
         setAngle(hitAngle);
         setTimeout(() => setAngle(0), 200);
@@ -96,9 +92,7 @@ function PinBall() {
   useEffect(() => {
     let t;
     if (charging) {
-      t = setInterval(() => {
-        setPower((p) => Math.min(p + 5, 100));
-      }, 30);
+      t = setInterval(() => setPower((p) => Math.min(p + 5, 100)), 30);
     }
     return () => clearInterval(t);
   }, [charging]);
@@ -114,11 +108,12 @@ function PinBall() {
         return {
           x: (rect.left - container.left + rect.width / 2) / scale.x,
           y: (rect.top - container.top + rect.height / 2) / scale.y,
-          r: (rect.width / 2) / scale.x,
+          r: rect.width / 2 / scale.x,
         };
       });
       setBumpers(list);
     };
+
     updateBumpers();
     window.addEventListener("resize", updateBumpers);
     return () => window.removeEventListener("resize", updateBumpers);
@@ -129,14 +124,28 @@ function PinBall() {
     const gravity = 0.6;
     const radius = 49;
 
+    const circleRotatedRectCollision = (cx, cy, r, rect, angleDeg, isLeftGuard = false) => {
+      const offsetX = isLeftGuard ? 80 : 0;
+      const adjustedRect = { ...rect, x: rect.x + offsetX };
+
+      const angle = -angleDeg * (Math.PI / 180);
+      const centerX = adjustedRect.x + adjustedRect.w / 2;
+      const centerY = adjustedRect.y + adjustedRect.h / 2;
+      const dx = cx - centerX;
+      const dy = cy - centerY;
+      const rx = dx * Math.cos(angle) - dy * Math.sin(angle) + centerX;
+      const ry = dx * Math.sin(angle) + dy * Math.cos(angle) + centerY;
+      return circleRectCollision(rx, ry, r, adjustedRect);
+    };
+
     const update = () => {
       setBallPos((prev) => {
         let x = prev.x;
         let y = prev.y;
         let vx = ballVel.x;
         let vy = ballVel.y + gravity;
-
         const steps = 4;
+
         for (let i = 0; i < steps; i++) {
           x += vx / steps;
           y += vy / steps;
@@ -144,11 +153,11 @@ function PinBall() {
           // 화면 벽 충돌
           if (x < 0) { x = 0; vx *= -0.9; }
           if (x > 370) { x = 370; vx *= -0.9; }
+          if (y < 0) { y = 0; vy *= -0.6; }
           if (y > 1000) { y = 1000; vy *= -0.6; }
-          if (y < 0) { y = 0; vy *= -0.6;}
 
           /* ------------------ 범퍼 충돌 ------------------ */
-          bumpers.forEach((b) => {
+          bumpers.forEach((b, i) => {
             if (!b) return;
             const dx = x + radius / 2 - b.x;
             const dy = y + radius / 2 - b.y;
@@ -163,12 +172,12 @@ function PinBall() {
               vx *= 0.7; vy *= 0.7;
               const overlap = limit - dist + 0.5;
               x += nx * overlap;
-              y += ny * overlap; // 범퍼와 닿으면 flipper 충돌 가능성 플래그
+              y += ny * overlap;
 
               if (!bumperHitRef.current[i]) {
-                  setScore((prev) => prev + 1);
-                  bumperHitRef.current[i] = true;
-                }
+                setScore((prev) => prev + 1);
+                bumperHitRef.current[i] = true;
+              }
             } else {
               bumperHitRef.current[i] = false;
             }
@@ -182,7 +191,6 @@ function PinBall() {
 
             const fx = rect.x + rect.w / 2;
             const fy = rect.y + rect.h / 2;
-
             const dx = x + radius / 2 - fx;
             const dy = y + radius / 2 - fy;
             const dist = Math.sqrt(dx * dx + dy * dy);
@@ -195,12 +203,10 @@ function PinBall() {
               vx -= 2 * dot * nx;
               vy -= 2 * dot * ny;
 
-              // 충분히 바깥으로 밀어주기
               const overlap = limit - dist + 1;
               x += nx * overlap;
               y += ny * overlap;
 
-              // 힘 적용은 스페이스바 떼기 전까지 무시
               setBallHitsFlipper(true);
 
               if (Math.abs(vx) < 0.15) vx = 0;
@@ -210,45 +216,28 @@ function PinBall() {
 
           /* ------------------ 가드 충돌 ------------------ */
           const guards = [
-            { el: leftGuardRef.current, angle: -30 },
-            { el: rightGuardRef.current, angle: 30 },
+            { el: leftGuardRef.current, angle: -30, isLeft: true },
+            { el: rightGuardRef.current, angle: 30, isLeft: false },
           ];
-          guards.forEach(({ el, angle }) => {
+
+          guards.forEach(({ el, angle, isLeft }) => {
             if (!el) return;
             const rect = getRectPosition(el);
             if (!rect) return;
             const cx = x + radius / 2;
             const cy = y + radius / 2;
+
             const collided = circleRotatedRectCollision(
               cx,
               cy,
               radius / 2,
-              {
-                x: rect.x + rect.w * 0.25,  // 왼쪽 여백
-                y: rect.y,
-                w: rect.w * 0.9,            // 폭 절반
-                h: rect.h
-              },
-              angle
+              { ...rect, x: rect.x + rect.w * 0.25, y: rect.y, w: rect.w * 0.9, h: rect.h },
+              angle,
+              isLeft
             );
+
             if (collided) { vx *= -0.8; vy *= -0.8; }
           });
-
-          function circleRotatedRectCollision(cx, cy, r, rect, angleDeg, isLeftGuard = false) {
-  // 왼쪽 가드만 x offset 적용
-  const offsetX = isLeftGuard ? 80 : 0; // console.log 값 기준 적당히 조정
-  const adjustedRect = { ...rect, x: rect.x + offsetX };
-
-  const angle = -angleDeg * (Math.PI / 180);
-  const centerX = adjustedRect.x + adjustedRect.w / 2;
-  const centerY = adjustedRect.y + adjustedRect.h / 2;
-  const dx = cx - centerX;
-  const dy = cy - centerY;
-  const rx = dx * Math.cos(angle) - dy * Math.sin(angle) + centerX;
-  const ry = dx * Math.sin(angle) + dy * Math.cos(angle) + centerY;
-  return circleRectCollision(rx, ry, r, adjustedRect);
-}
-
         }
 
         setBallVel({ x: vx, y: vy });
@@ -260,6 +249,7 @@ function PinBall() {
     return () => clearInterval(t);
   }, [ballVel, bumpers, scale]);
 
+  /* ------------------ 최고 점수 업데이트 ------------------ */
   useEffect(() => {
     if (score > bestScore) {
       setBestScore(score);
@@ -282,115 +272,64 @@ function PinBall() {
   /* ------------------ 렌더링 ------------------ */
   return (
     <>
-    <Header />
-    <div className="pinball-wrapper">
-      <div className="pinball-score-panel">
-        <div>Score: {score/2}</div>
-        <div>Best: {bestScore/2}</div>  
-        <button
-          onClick={() => {
-            setScore(0);
-            setBallPos({ x: 180, y: 10 });
-            setBallVel({ x: 0, y: 0 });
-            setPower(0);
-            setBallHitsFlipper(false);
-          }}
-        >
-          다시하기
-        </button>
-      </div>
+      <Header />
+      <div className="pinball-wrapper">
+        <div className="pinball-score-panel">
+          <div>Score: {score / 2}</div>
+          <div>Best: {bestScore / 2}</div>
+          <button
+            onClick={() => {
+              setScore(0);
+              setBallPos({ x: 180, y: 10 });
+              setBallVel({ x: 0, y: 0 });
+              setPower(0);
+              setBallHitsFlipper(false);
+            }}
+          >
+            다시하기
+          </button>
+        </div>
 
-      <div className="pinball-container" ref={containerRef}>
-        <img src="/background.png" className="background" alt="" />
-        {[1, 2, 3].map((n, i) => (
-          <div key={n} className={`bumper bumper${n}`} ref={(el) => (bumpersRef.current[i] = el)} />
-        ))}
-        <div className="guard left-guard" ref={leftGuardRef} />
-        <div className="guard right-guard" ref={rightGuardRef} />
+        <div className="pinball-container" ref={containerRef}>
+          <img src="/background.png" className="background" alt="" />
+          {[1, 2, 3].map((n, i) => (
+            <div key={n} className={`bumper bumper${n}`} ref={(el) => (bumpersRef.current[i] = el)} />
+          ))}
 
-        <img
-          src="/flipper_left.png"
-          className="flipper left"
-          alt=""
-          ref={leftFlipperRef}
-          style={{ transform: `rotate(${-angle}deg)` }}
-        />
-        <img
-          src="/flipper_right.png"
-          className="flipper right"
-          alt=""
-          ref={rightFlipperRef}
-          style={{ transform: `rotate(${angle}deg)` }}
-        />
+          <div className="guard left-guard" ref={leftGuardRef} />
+          <div className="guard right-guard" ref={rightGuardRef} />
 
-        {[leftFlipperRef.current, rightFlipperRef.current, leftGuardRef.current, rightGuardRef.current].map((el, i) => {
-    if (!el) return null;
-    const rect = getRectPosition(el);
-    if (!rect) return null;
+          <img
+            src="/flipper_left.png"
+            className="flipper left"
+            alt=""
+            ref={leftFlipperRef}
+            style={{ transform: `rotate(${-angle}deg)` }}
+          />
+          <img
+            src="/flipper_right.png"
+            className="flipper right"
+            alt=""
+            ref={rightFlipperRef}
+            style={{ transform: `rotate(${angle}deg)` }}
+          />
+          <img
+            src="/ball.png"
+            className="ball"
+            alt=""
+            style={{
+              top: `${ballPos.y * scale.y}px`,
+              left: `${ballPos.x * scale.x}px`,
+              width: `${98 * scale.x}px`,
+              height: `${98 * scale.y}px`,
+            }}
+          />
 
-    // 각도 설정: 플리퍼는 angle, 가드는 고정
-    const rotateAngle = 
-      el === leftFlipperRef.current ? -angle :
-      el === rightFlipperRef.current ? angle :
-      el === leftGuardRef.current ? -30 :
-      30;
-
-    // 여기서 2번: 가드 폭 줄이기
-    // 왼쪽 가드 폭 줄이고 위치도 조금 보정
-const displayRect = 
-  el === leftGuardRef.current
-    ? {  ...rect,
-  x: rect.x + rect.w * 0.2, // 왼쪽 보정
-  w: rect.w * 0.7 } // 왼쪽 가드 보정
-    : el === rightGuardRef.current
-    ? { ...rect, x: rect.x + rect.w * 0.15, w: rect.w * 0.7 } // 오른쪽 가드
-    : rect;
-
-
-    // 여기서 3번: transform-origin 설정
-const transformOrigin =
-  el === leftFlipperRef.current ? "left top" :
-  el === rightFlipperRef.current ? "right top" :
-  el === leftGuardRef.current ? "bottom left" : // 왼쪽 가드
-  el === rightGuardRef.current ? "bottom right" : // 오른쪽 가드
-  "center center";
-    return (
-      <div
-        key={i}
-        style={{
-          position: "absolute",
-          top: `${displayRect.y * scale.y + (displayRect.h * scale.y)/2}px`,
-          left: `${displayRect.x * scale.x + (displayRect.w * scale.x)/2}px`,
-          width: `${displayRect.w * scale.x}px`,
-          height: `${displayRect.h * scale.y}px`,
-          transform: `translate(-50%, -50%) rotate(${rotateAngle}deg)`,
-          transformOrigin: transformOrigin, // 3번 적용
-          border: "2px solid red",
-          pointerEvents: "none",
-          zIndex: 9999,
-        }}
-      />
-    );
-})}
-
-
-        <img
-          src="/ball.png"
-          className="ball"
-          alt=""
-          style={{
-            top: `${ballPos.y * scale.y}px`,
-            left: `${ballPos.x * scale.x}px`,
-            width: `${98 * scale.x}px`,
-            height: `${98 * scale.y}px`,
-          }}
-        />
-
-        <div className="power-bar">
-          <div className="power-fill" style={{ width: `${power}%` }} />
+          <div className="power-bar">
+            <div className="power-fill" style={{ width: `${power}%` }} />
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
