@@ -118,8 +118,8 @@
 
 .pinball-score-panel {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 200px;
+  left: 500px;
   display: flex;
   flex-direction: column;
   gap: 10px;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./PinBall.css";
+import Header from "../Header/Header";
 
 function PinBall() {
   const [power, setPower] = useState(0);
@@ -255,6 +256,7 @@ function PinBall() {
   /* ------------------ 렌더링 ------------------ */
   return (
     <>
+    <Header />
     <div className="pinball-score-panel">
       <div>Score: {score/2}</div>
       <div>Best: {bestScore/2}</div>
