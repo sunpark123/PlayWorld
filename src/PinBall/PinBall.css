@@ -69,14 +69,14 @@
 
   .guard {
     position: absolute;
-    bottom: 145px;
+    bottom: 70px;
     width: 20px;
-    height: 120px;
+    height: 250px;
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid #000;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(44, 44, 44, 0.4);
-    z-index: 2;
+    z-index: 2; 
 
     &.left-guard {
       left: 45px;
@@ -114,4 +114,24 @@
       right: 80px;
     }
   }
+}
+
+.pinball-score-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+
+  z-index: 9999;
+  pointer-events: none; /* 클릭 방해 X */
 }
